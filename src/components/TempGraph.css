@@ -1,0 +1,11 @@
+.chicago {
+    fill: rgba(180, 69, 87, 0.288);
+    stroke: rgb(134, 60, 60);
+    stroke-width: 2px;
+  }
+  
+  .london {
+    fill: rgba(21, 104, 129, 0.26);
+    stroke: rgb(13, 86, 95);
+    stroke-width: 2px;
+  }
