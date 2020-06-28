@@ -15,12 +15,16 @@
   }
 }
 
+.content{
+  margin-top: 50px;
+}
+
 .App-content {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
   align-items: center;
-  margin-top: 150px;
+  margin-top: 50px;
   font-size: calc(10px + 2vmin);
 }
 
@@ -37,10 +41,3 @@
   }
 }
 
-.header {
-  display: block;
-  margin: 0;
-  padding-top: 20px;
-  font-size: large;
-  color:  rgb(23, 16, 34);
-}

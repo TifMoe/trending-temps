@@ -1,11 +1,32 @@
-.chicago {
+.first {
     fill: rgba(180, 69, 87, 0.288);
-    stroke: rgb(134, 60, 60);
-    stroke-width: 2px;
   }
   
-  .london {
+.first-line {
+    stroke: rgb(134, 60, 60);
+    stroke-width: 3px;
+}
+
+  .second {
     fill: rgba(21, 104, 129, 0.26);
-    stroke: rgb(13, 86, 95);
-    stroke-width: 2px;
   }
+
+  .second-line {
+    stroke-width: 3px;
+    stroke: rgb(13, 86, 95);
+  }
+
+  .svg-container {
+    display: inline-block;
+    position: relative;
+    width: 100%;
+    padding-bottom: 100%; /* aspect ratio */
+    vertical-align: top;
+    overflow: hidden;
+}
+.svg-content-responsive {
+    display: inline-block;
+    position: absolute;
+    top: 10px;
+    left: 0;
+}
