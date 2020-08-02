@@ -1,10 +1,11 @@
 import React, { Component } from 'react'
 import { Container, Row, Col } from 'react-bootstrap';
+import { ApolloProvider, ApolloClient, InMemoryCache } from '@apollo/client';
 
 // Components
 import Header from './components/Header'
 import TempGraph from './components/TempGraph'
-import CityLabel from './components/CityLabel'
+import LocationSelector from './components/LocationSelector'
 
 // Data
 import data from './data/locations.json';
@@ -13,12 +14,18 @@ import data from './data/locations.json';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './App.css';
 
+const client = new ApolloClient({
+  uri: 'https://api.trendingtemps.com',
+  cache: new InMemoryCache()
+});
+
 class App extends Component {
 
   constructor(){
     super()
     this.state = {
         selectedCity: 0,
+        city: 'chicago',
         tempRange: [-50, 150],
         cities: [],
         allData: [{"values": []}],
@@ -51,26 +58,23 @@ class App extends Component {
     })
   }
 
-  updateCitySelection = (cityIndex) => {
+  updateCitySelection = (cityIndex, cityName) => {
     console.log(cityIndex)
     this.setState({ selectedCity: cityIndex })
+    this.setState({ city: cityName })
   }
 
   render() {
-    let cityName = this.state.cities[this.state.selectedCity]
     return (
+      <ApolloProvider client={client}>
       <div className="App">
         <Container>
-
           <Row>
             <Col md={6}>
               <Header />
             </Col>
             <Col md={6}>
-              <CityLabel 
-                cities={this.state.cities}
-                updateCities={this.updateCitySelection}
-                selectedCity={this.state.selectedCity}/>
+              <LocationSelector updateCity={this.updateCitySelection} />
             </Col>
           </Row>
 
@@ -86,6 +90,7 @@ class App extends Component {
 
         </Container>
       </div>
+      </ApolloProvider>
     );
   }
 }
