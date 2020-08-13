@@ -1,98 +1,84 @@
-import React, { Component } from 'react'
+import React, { useState, useCallback, useEffect } from 'react';
 import { Container, Row, Col } from 'react-bootstrap';
-import { ApolloProvider, ApolloClient, InMemoryCache } from '@apollo/client';
+import { useQuery, gql } from '@apollo/client';
 
 // Components
 import Header from './components/Header'
-import TempGraph from './components/TempGraph'
+import TempLineGraph from './components/TempLineGraph'
 import LocationSelector from './components/LocationSelector'
-
-// Data
-import data from './data/locations.json';
 
 // Style
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './App.css';
 
-const client = new ApolloClient({
-  uri: 'https://api.trendingtemps.com',
-  cache: new InMemoryCache()
-});
 
-class App extends Component {
-
-  constructor(){
-    super()
-    this.state = {
-        selectedCity: 0,
-        city: 'chicago',
-        tempRange: [-50, 150],
-        cities: [],
-        allData: [{"values": []}],
-        dateRange: ["Jan 1989", "Dec 2019"],
+const RANGES = gql`
+    query GetRanges {
+      result: ranges {
+            minDate
+            maxDate
+            minTemp
+            maxTemp
+        }
     }
+`;
+
+function App() {
+
+  // Set default ranges
+  const defaultRanges = {
+    years: [1989, 2019],
+    dates: ['1989-01-01', '2019-12-01'],
+    temps: [-20, 100]
   }
 
-  async UNSAFE_componentWillMount() {
-    await this.fetchData();
-  }
+  const [city, setCity] = useState('london');
+  const rangeData = useQuery(RANGES)
+  const [ranges, setRanges] = useState(defaultRanges);
 
-  fetchData() {
-    this.setDataInState(data.locations);
-  }
+  useEffect(
+    () => {
+      // Set global ranges for all locations in dataset
+      console.log("running range query!")
+      if (!rangeData.loading && !rangeData.error) {
+        let newRanges = {
+          years: [
+              new Date(rangeData.data.result.minDate).getFullYear(),
+              new Date(rangeData.data.result.maxDate).getFullYear()
+          ],
+          dates: [rangeData.data.result.minDate, rangeData.data.result.maxDate],
+          temps: [rangeData.data.result.minTemp, rangeData.data.result.maxTemp]
+        }
+        setRanges(newRanges)
+      }
+    }, [rangeData]
+  )
 
-  setDataInState(data) {
-    let names = []
-    let minTemp = 0
-    let maxTemp = 100
-    data.forEach(e => {
-      names.push(e.city)
-      minTemp = e.values.reduce((min, p) => p.mint < min ? p.mint : min, minTemp)
-      maxTemp = e.values.reduce((max, p) => p.maxt > max ? p.maxt : max, maxTemp)
-    });
-    console.log(names)
-    this.setState({
-        allData: data,
-        cities: names,
-        tempRange: [minTemp, maxTemp]
-    })
-  }
+  const wrapperSetCity = useCallback(val => {
+    setCity(val);
+  }, [setCity]);
 
-  updateCitySelection = (cityIndex, cityName) => {
-    console.log(cityIndex)
-    this.setState({ selectedCity: cityIndex })
-    this.setState({ city: cityName })
-  }
+  return (
+    <div className="App">
+      <Container>
+        <Row>
+          <Col md={6}>
+            <Header />
+          </Col>
+          <Col md={6}>
+            <LocationSelector city={city} updateParentCity={wrapperSetCity} />
+          </Col>
+        </Row>
 
-  render() {
-    return (
-      <ApolloProvider client={client}>
-      <div className="App">
-        <Container>
-          <Row>
-            <Col md={6}>
-              <Header />
-            </Col>
-            <Col md={6}>
-              <LocationSelector updateCity={this.updateCitySelection} />
-            </Col>
-          </Row>
+        <Row className="content">
+          <Col md={12}>
+            <TempLineGraph city={city} ranges={ranges}/>
+          </Col>
+        </Row>
 
-          <Row className="content">
-            <Col md={12}>
-              <TempGraph 
-                data={this.state.allData} 
-                city={this.state.selectedCity}
-                dateRange={this.state.dateRange}
-                tempRange={this.state.tempRange}/>
-            </Col>
-          </Row>
-
-        </Container>
-      </div>
-      </ApolloProvider>
-    );
-  }
+      </Container>
+    </div>
+  );
 }
 
 export default App;
