@@ -1,98 +1,79 @@
-import React, { Component } from 'react'
-import { Container, Row, Col } from 'react-bootstrap';
-import { ApolloProvider, ApolloClient, InMemoryCache } from '@apollo/client';
+import React, { useState, useCallback, useEffect } from "react";
+import { useQuery } from "@apollo/client";
+import { GLOBAL_RANGES } from "./util/queries";
 
 // Components
-import Header from './components/Header'
-import TempGraph from './components/TempGraph'
-import LocationSelector from './components/LocationSelector'
-
-// Data
-import data from './data/locations.json';
+import Header from "./components/Header";
+import TempLineGraph from "./components/TempLineGraph";
+import LocationSelector from "./components/LocationSelector";
+import RainChart from "./components/RainChart";
+import WorldMap from "./components/Map";
 
 // Style
-import 'bootstrap/dist/css/bootstrap.min.css';
-import './App.css';
+import "bootstrap/dist/css/bootstrap.min.css";
+import "./App.css";
 
-const client = new ApolloClient({
-  uri: 'https://api.trendingtemps.com',
-  cache: new InMemoryCache()
-});
 
-class App extends Component {
+function App() {
+  // Set default ranges
+  const defaultRanges = {
+    years: [1989, 2019],
+    dates: ["1989-01-01", "2019-12-01"],
+    temps: [-20, 100],
+  };
 
-  constructor(){
-    super()
-    this.state = {
-        selectedCity: 0,
-        city: 'chicago',
-        tempRange: [-50, 150],
-        cities: [],
-        allData: [{"values": []}],
-        dateRange: ["Jan 1989", "Dec 2019"],
+  const [city, setCity] = useState("london");
+  const rangeData = useQuery(GLOBAL_RANGES);
+  const [ranges, setRanges] = useState(defaultRanges);
+
+  useEffect(() => {
+    // Set global ranges for all locations in dataset
+    if (!rangeData.loading && !rangeData.error) {
+      let newRanges = {
+        years: [
+          new Date(rangeData.data.result.minDate).getFullYear(),
+          new Date(rangeData.data.result.maxDate).getFullYear(),
+        ],
+        dates: [rangeData.data.result.minDate, rangeData.data.result.maxDate],
+        temps: [rangeData.data.result.minTemp, rangeData.data.result.maxTemp],
+      };
+      setRanges(newRanges);
     }
-  }
+  }, [rangeData]);
 
-  async UNSAFE_componentWillMount() {
-    await this.fetchData();
-  }
+  const wrapperSetCity = useCallback(
+    (val) => {
+      setCity(val);
+    },
+    [setCity]
+  );
 
-  fetchData() {
-    this.setDataInState(data.locations);
-  }
-
-  setDataInState(data) {
-    let names = []
-    let minTemp = 0
-    let maxTemp = 100
-    data.forEach(e => {
-      names.push(e.city)
-      minTemp = e.values.reduce((min, p) => p.mint < min ? p.mint : min, minTemp)
-      maxTemp = e.values.reduce((max, p) => p.maxt > max ? p.maxt : max, maxTemp)
-    });
-    console.log(names)
-    this.setState({
-        allData: data,
-        cities: names,
-        tempRange: [minTemp, maxTemp]
-    })
-  }
-
-  updateCitySelection = (cityIndex, cityName) => {
-    console.log(cityIndex)
-    this.setState({ selectedCity: cityIndex })
-    this.setState({ city: cityName })
-  }
-
-  render() {
-    return (
-      <ApolloProvider client={client}>
-      <div className="App">
-        <Container>
-          <Row>
-            <Col md={6}>
-              <Header />
-            </Col>
-            <Col md={6}>
-              <LocationSelector updateCity={this.updateCitySelection} />
-            </Col>
-          </Row>
-
-          <Row className="content">
-            <Col md={12}>
-              <TempGraph 
-                data={this.state.allData} 
-                city={this.state.selectedCity}
-                dateRange={this.state.dateRange}
-                tempRange={this.state.tempRange}/>
-            </Col>
-          </Row>
-
-        </Container>
+  return (
+    <div className="wrapper">
+      <div className="box logo">
+        <Header />
       </div>
-      </ApolloProvider>
-    );
-  }
+      <div className="box city">
+        <LocationSelector city={city} updateParentCity={wrapperSetCity} />
+      </div>
+      <div className="box map">
+        <WorldMap city={city} updateParentCity={wrapperSetCity} />
+      </div>
+      <div className="box temp">
+        <TempLineGraph city={city} ranges={ranges} />
+      </div>
+      <div className="box percip">
+        <RainChart city={city} />
+      </div>
+      <div className="box brush">
+        Brush to filter on year coming soon
+      </div>
+      <div className="box description">
+        Personal dashboard to practice D3.js by exploring historical weather trends. <br />
+        Select a city from the map or dropdown to view temperature and percipitation data
+      </div>
+    </div>
+  );
 }
 
 export default App;

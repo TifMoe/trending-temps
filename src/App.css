@@ -1,43 +1,133 @@
-.App {
+:root {
+  --background: #283d44;
+  --chart-background: #394f57;
+  --yellow: #ffed18;
+  --font: rgba(255, 255, 255, 0.856);
+}
+
+body {
+  margin: 40px;
+  background-color: var(--background);
+  justify-content: center;
+  font-family: 'Open Sans', sans-serif;
+}
+
+h4 {
+  font-weight: normal;
+}
+
+h3 {
+  font-weight: bold !important;
+}
+
+.temp {
+  grid-area: temp;
   text-align: center;
-  background-color: #fafafa;
-  color: rgb(10, 11, 19);
 }
 
-.App-logo {
-  height: 40vmin;
-  pointer-events: none;
+.map {
+  grid-area: map;
+  background-color: var(--background) !important;
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  .App-logo {
-    animation: App-logo-spin infinite 20s linear;
+.percip {
+  grid-area: percip;
+  text-align: center;
+  height: 100%;
+}
+
+.logo {
+  grid-area: logo;
+  background-color: var(--background) !important;
+  justify-items: center;
+}
+
+.locations {
+  grid-area: locations;
+}
+
+.brush {
+  grid-area: brush;
+}
+
+.description {
+  grid-area: description;
+  font-size: 15px !important;
+  text-align: left !important;
+}
+
+.city {
+  grid-area: city;
+  max-height: 150px;
+  background-color: var(--background) !important;
+  justify-items: center;
+}
+
+.city-name {
+  display: inline;
+  top: 0;
+}
+
+/* Default Mobile Layout */
+.wrapper {
+  display: grid;
+  grid-gap: 20px;
+  grid-template-columns: 1fr;
+  grid-template-areas:
+    "logo"
+    "map"
+    "city"
+    "temp"
+    "brush"
+    "percip"
+    "description";
+  color: var(--font);
+  width: 100%;
+  padding: 0px 20px;
+  border-radius: 5px;
+  align-items: stretch;
+}
+
+/* Tablet Layout */
+/* @media only screen and (min-width: 500px)  {
+	.wrapper {
+		grid-template-columns: 1fr 1fr 1fr;
+		grid-template-areas:
+    "logo logo city"
+    "map map map"
+    "map map map"
+    "temp temp temp"
+    "temp temp temp"
+    "brush brush brush"
+    "percip percip description";
   }
-}
+} */
 
-.content{
-  margin-top: 50px;
-}
+/* Desktop Layout */
+	@media only screen and (min-width: 800px)   {
+		.wrapper {
+      grid-gap: 20px;
+			grid-template-columns: 1fr 1fr 1fr;
+			grid-template-areas:
+      "logo map map"
+      "city map map"
+      "temp temp percip"
+      "temp temp percip"
+      "brush brush description";
+    }
 
-.App-content {
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  margin-top: 50px;
-  font-size: calc(10px + 2vmin);
-}
-
-.App-link {
-  color: #61dafb;
-}
-
-@keyframes App-logo-spin {
-  from {
-    transform: rotate(0deg);
+    .box {
+      padding: 30px !important;
+    }
   }
-  to {
-    transform: rotate(360deg);
-  }
+
+.box {
+  border-radius: 5px;
+  padding: 10px;
+  font-size: 150%;
+  justify-content: center;
+  text-align: center;
+  background-color: var(--chart-background);
+  position: relative;
 }
 

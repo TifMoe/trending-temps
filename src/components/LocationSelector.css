@@ -1,0 +1,14 @@
+.city-name {
+    font-size: 2.5em;
+    font-family: 'Abril Fatface', cursive;
+}
+
+.city-options {
+    margin-left: 1em;
+    margin-bottom: 1em;
+    color: var(--font);
+    background-color: var(--chart-background) !important;
+    border-color: white !important;
+    border-width: 1px !important;
+    line-height: 1.25 !important;
+}
