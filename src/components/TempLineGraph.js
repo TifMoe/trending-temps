@@ -1,25 +1,15 @@
 import React, { useRef, useEffect } from "react";
-import { useQuery, gql } from "@apollo/client";
+import { useQuery } from "@apollo/client";
 
 import * as d3 from "d3";
 import "./TempGraph.css";
 import { PathLength } from "../util/d3Helpers";
+import { WEATHER } from "../util/queries";
 
-const WEATHER = gql`
-  query GetWeather($location: String!) {
-    weather(location: $location) {
-      date
-      month
-      year
-      temp
-      minTemp
-      maxTemp
-    }
-  }
-`;
+
 const margin = { top: 20, right: 20, bottom: 50, left: 70 },
   width = 600 - margin.left - margin.right,
-  height = 150 - margin.top - margin.bottom;
+  height = 250 - margin.top - margin.bottom;
 
 function TempLineGraph({ city, ranges }) {
   const d3Container = useRef(null);
@@ -32,7 +22,6 @@ function TempLineGraph({ city, ranges }) {
   const minYear = ranges.years[0];
   const maxYear = ranges.years[1];
   const yearDisplay = minYear === maxYear ? minYear : `${minYear} - ${maxYear}`;
-  const cityDisplay = city[0].toUpperCase() + city.substr(1).toLowerCase();
 
   useEffect(() => {
     // This will remove any existing svg in the chart on prop update
@@ -64,7 +53,7 @@ function TempLineGraph({ city, ranges }) {
       .select(d3Container.current)
       .append("svg")
       .attr("preserveAspectRatio", "xMinYMin meet")
-      .attr("viewBox", "0 0 600 150")
+      .attr("viewBox", "0 0 600 250")
       .classed("svg-content-responsive", true);
 
     // Make X Axis
@@ -138,7 +127,7 @@ function TempLineGraph({ city, ranges }) {
         .append("path")
             .attr("d", line)
             .attr("fill", "none")
-            .attr("stroke", "grey")
+            .attr("stroke", "var(--yellow)")
             .style("stroke-width", "1px")
         .transition()
             .duration(10000)
@@ -148,22 +137,20 @@ function TempLineGraph({ city, ranges }) {
     chart
       .append("path")
       .attr("d", minArea(data))
-      .attr("opacity", "30%")
-      .attr("fill", "blue");
+      .attr("opacity", "40%")
+      .attr("fill", "var(--font)");
 
     chart
       .append("path")
       .attr("d", maxArea(data))
-      .attr("opacity", "30%")
-      .attr("fill", "red");
+      .attr("opacity", "40%")
+      .attr("fill", "var(--font)");
   }, [result, city, ranges]);
 
   return (
     <div>
-      <h3>{cityDisplay}</h3>
-      <p>
-        <b>{yearDisplay}</b> <br /> Monthly Min and Max Temps{" "}
-      </p>
+      <h4>Monthly Min and Max Temps</h4>
+      <h3>{yearDisplay}</h3>
       <div className="svg-container" ref={d3Container}></div>
     </div>
   );

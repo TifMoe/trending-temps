@@ -1,19 +1,9 @@
 import React, { useState, useEffect } from "react";
-import { useQuery, gql } from "@apollo/client";
+import { useQuery } from "@apollo/client";
 import { Dropdown } from "react-bootstrap";
+import { LOCATIONS } from "../util/queries";
 
-const LOCATIONS = gql`
-  query GetLocations {
-    locations {
-      name
-      observations
-      latitude
-      longitude
-      monthRange
-      tempRange
-    }
-  }
-`;
+import './LocationSelector.css'
 
 function LocationSelector({ city, updateParentCity }) {
   const [selectedCity, updateCity] = useState(city);
@@ -28,10 +18,9 @@ function LocationSelector({ city, updateParentCity }) {
   if (error) return <p>Error fetching cities :(</p>;
 
   return (
-    <Dropdown style={{ marginTop: "50px" }}>
-      <Dropdown.Toggle variant="secondary" id="dropdown-basic">
-        Select a City
-      </Dropdown.Toggle>
+    <Dropdown>
+      <span className="city-name">{city.toUpperCase()}</span>
+      <Dropdown.Toggle className="city-options"></Dropdown.Toggle>
 
       <Dropdown.Menu>
         {unpackCityOptions(data.locations, updateCity)}

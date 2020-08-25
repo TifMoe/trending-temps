@@ -1,0 +1,8 @@
+.bucket-svg-container {
+    display: inline-block;
+    position: relative;
+    width: 50%;
+    padding-bottom: 90%; /* aspect ratio */
+    vertical-align: top;
+    overflow: hidden;
+}
