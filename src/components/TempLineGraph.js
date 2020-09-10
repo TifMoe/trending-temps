@@ -3,7 +3,6 @@ import { useQuery } from "@apollo/client";
 
 import * as d3 from "d3";
 import "./TempGraph.css";
-import { PathLength } from "../util/d3Helpers";
 import { WEATHER } from "../util/queries";
 
 
@@ -13,6 +12,13 @@ const margin = { top: 20, right: 20, bottom: 50, left: 70 },
 
 function TempLineGraph({ city, ranges }) {
   const d3Container = useRef(null);
+  // Find min and max date for X axis
+  const minDate = new Date(ranges.dates[0]);
+  const maxDate = new Date(ranges.dates[1]);
+
+  // Find min and max temps for Y axis (with 10 degree buffer)
+  const yMin = ranges.temps[0] - 10;
+  const yMax = ranges.temps[1] + 10;
 
   let result = useQuery(WEATHER, {
     variables: { location: city },
@@ -24,30 +30,26 @@ function TempLineGraph({ city, ranges }) {
   const yearDisplay = minYear === maxYear ? minYear : `${minYear} - ${maxYear}`;
 
   useEffect(() => {
-    // This will remove any existing svg in the chart on prop update
+    // This will remove any existing svg in the chart on range update
     let chart = d3.select(d3Container.current);
     chart.selectAll("svg").remove();
-  }, [city, ranges]);
+  }, [ranges]);
 
   useEffect(() => {
     let data = {};
-    if (result && !result.loading && !result.error) {
-      data = JSON.parse(JSON.stringify(result.data.weather));
-      data.forEach((d) => {
-        d.date = new Date(d.date); // x
-        d.temp = +d.temp; // y
-        d.minTemp = +d.minTemp; // y
-        d.maxTemp = +d.maxTemp; // y
-      });
+    
+    if (!result || result.loading || result.error) {
+      console.log('resturning!')
+      return 
     }
 
-    // Find min and max date for X axis
-    const minDate = new Date(ranges.dates[0]);
-    const maxDate = new Date(ranges.dates[1]);
-
-    // Find min and max temps for Y axis (with 10 degree buffer)
-    const yMin = ranges.temps[0] - 10;
-    const yMax = ranges.temps[1] + 10;
+    data = JSON.parse(JSON.stringify(result.data.weather));
+    data.forEach((d) => {
+      d.date = new Date(d.date); // x
+      d.temp = +d.temp; // y
+      d.minTemp = +d.minTemp; // y
+      d.maxTemp = +d.maxTemp; // y
+    });
 
     const svgCanvas = d3
       .select(d3Container.current)
@@ -87,9 +89,7 @@ function TempLineGraph({ city, ranges }) {
       });
 
     var lineData = lineFreezing(data);
-
-    chart
-      .append("path")
+    chart.append("path")
       .attr("d", lineData)
       .attr("fill", "none")
       .attr("stroke", "grey")
@@ -119,33 +119,46 @@ function TempLineGraph({ city, ranges }) {
       .y((d) => {
         return yScale(d.temp);
       });
+
+     // First define all the lines and areas
+    chart.datum(data)
+      .append("path")
+        .attr("class", "line")
+        .attr("fill", "none")
+        .attr("stroke", "var(--yellow)")
+        .style("stroke-width", "1px")
+
+    chart
+      .append("path")
+        .attr("class", "minArea")
+        .attr("opacity", "40%")
+        .attr("fill", "var(--font)");
+
+    chart
+      .append("path")
+        .attr("class", "maxArea")
+        .attr("opacity", "40%")
+        .attr("fill", "var(--font)");
+
+    // Transition Time
+    var t = d3.transition()
+        .duration(1750)
+        .ease(d3.easeLinear);
     
-    const l = PathLength(line(data));
+    // Update the paths between city transitions
+    d3.select(".line")
+        .transition(t)
+        .attr("d", line(data))
 
-    chart
-        .datum(data)
-        .append("path")
-            .attr("d", line)
-            .attr("fill", "none")
-            .attr("stroke", "var(--yellow)")
-            .style("stroke-width", "1px")
-        .transition()
-            .duration(10000)
-            .ease(d3.easeLinear)
-            .attr("stroke-dasharray", `${l},${l}`);
-
-    chart
-      .append("path")
+    d3.select(".minArea")
+      .transition(t)
       .attr("d", minArea(data))
-      .attr("opacity", "40%")
-      .attr("fill", "var(--font)");
 
-    chart
-      .append("path")
+    d3.select(".maxArea")
+      .transition(t)
       .attr("d", maxArea(data))
-      .attr("opacity", "40%")
-      .attr("fill", "var(--font)");
-  }, [result, city, ranges]);
+
+  }, [result, city, ranges, maxDate, minDate, yMax, yMin]);
 
   return (
     <div>
@@ -155,6 +168,5 @@ function TempLineGraph({ city, ranges }) {
     </div>
   );
 }
-
 
 export default TempLineGraph;

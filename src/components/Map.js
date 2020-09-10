@@ -76,7 +76,12 @@ function WorldMap({ city, updateParentCity }) {
                     .append("circle")
                         .attr("cx", function(d) { var l = projection([d.lon, d.lat]); return l[0]; })
                         .attr("cy", function(d) { var l = projection([d.lon, d.lat]); return l[1]; })
-                        .attr("r", 10)
+                        .attr("r", function(d) {
+                            if (d.name.toLowerCase() === city) {
+                                return 15
+                            }
+                            return 10
+                        })
                         .attr("fill", function(d) {
                             if (d.name.toLowerCase() === city) {
                                 return "var(--yellow)"
@@ -90,23 +95,23 @@ function WorldMap({ city, updateParentCity }) {
                         d3.select("#mytooltip")
                             .style("visibility", "visible")
                             .text(d.name.toUpperCase())
+                        d3.select(this).style("stroke-width", 6)
                         })
                     .on("mousemove", function() {
-                    return (
                         d3.select("#mytooltip")
                             .style("top", (d3.event.pageY-40)+"px") 
                             .style("left",(d3.event.pageX)+"px")
-                        )
                         })
                     .on("mouseout",function() { 
                         //hide tooltip on mouseout
                         d3.select("#mytooltip")
                             .style("visibility", "hidden")
                             .style("fill", "transparent")
+                        d3.select(this).style("stroke-width", 4)
                         })
                     .on("click", function(d) {
                         updateCity(d.name.toLowerCase());
-                    });
+                    })
                 })
         }, [result, city])
 
