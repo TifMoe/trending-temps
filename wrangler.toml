@@ -1,9 +1,9 @@
 name = "trending-temps"
 type = "webpack"
 account_id = "661484bfa811d50ad0a7c946485ad9ae"
-zone_id = "3bd9290f20643845d27b837bf90597ff"
+zone_id = "d53c5683f00e72915fb714532816144a"
 workers_dev = false
-route = "trendingtemps.com/*"
+route = "temps.tiffanymoeller.com/*"
 
 [site]
 bucket = "./build"

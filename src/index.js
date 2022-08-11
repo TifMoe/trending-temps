@@ -7,7 +7,7 @@ import App from "./App";
 import * as serviceWorker from "./serviceWorker";
 
 const client = new ApolloClient({
-  uri: "https://api.trendingtemps.com",
+  uri: "https://graphql.tifmoe.workers.dev",
   cache: new InMemoryCache(),
 });
 
